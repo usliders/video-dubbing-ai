@@ -4,7 +4,7 @@ env/
 .env/
 
 # Игнорировать выходные данные
-data/output/
+#data/output/
 data/temp/
 data/input/original/
 
