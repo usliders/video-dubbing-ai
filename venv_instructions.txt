@@ -1,0 +1,42 @@
+# Инструкция по работе с виртуальным окружением (venv) и зависимостями
+
+1. Перейдите в папку проекта:
+   cd S:\Deep_Learning_School\Proekts\video_dubbing_ai_2025
+
+2. Если venv ещё не создано, создайте его:
+   python -m venv venv
+
+3. Активируйте виртуальное окружение (Windows PowerShell):
+   .\venv\Scripts\Activate.ps1
+
+   Если используете cmd:
+   .\venv\Scripts\activate.bat
+
+4. Обновите pip (рекомендуется):
+   pip install --upgrade pip
+
+5. Установите все зависимости из requirements.txt:
+   pip install -r requirements.txt
+
+6. Запустите основной скрипт:
+   python main.py
+
+   Или откройте Jupyter Notebook и запустите experiments_automated.ipynb из папки notebooks.
+
+---
+
+Если появятся ошибки по отсутствию модулей — повторите установку зависимостей.
+Если venv скопировано вручную, иногда требуется пересоздать окружение и снова установить зависимости.
+
+6. Как использовать venv для Jupyter Notebook
+a) Установите Jupyter и ipykernel в venv (если ещё не установлено):
+pip install jupyter ipykernel
+
+b) Зарегистрируйте ядро Jupyter для вашего venv:
+python -m ipykernel install --user --name=venv --display-name="venv_2025"
+
+c) Запустите Jupyter Notebook:
+jupyter notebook
+
+d) В ноутбуке (например, main_pipeline.ipynb или diagnostics.ipynb) выберите ядро "venv"
+(через меню Kernel → Change kernel → venv). 

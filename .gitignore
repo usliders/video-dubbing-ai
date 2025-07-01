@@ -1,0 +1,19 @@
+# Игнорировать виртуальное окружение
+venv/
+env/
+.env/
+
+# Игнорировать выходные данные
+data/output/
+data/temp/
+data/input/original/
+
+# Игнорировать временные/кэш-файлы
+__pycache__/
+*.pyc
+*.pyo
+*.ipynb_checkpoints
+
+# Игнорировать настройки IDE
+.vscode/
+.idea/

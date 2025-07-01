@@ -1,0 +1,34 @@
+# Основные зависимости для проекта Video Dubbing AI
+# Модули для ASR, MT, TTS, обработки аудио/видео, тестирования
+
+# PyTorch и трансформеры
+torch>=1.10
+transformers==4.36.2
+openai-whisper
+faster-whisper
+sentencepiece
+# fairseq (опционально, если потребуется)
+# fairseq
+
+# Обработка видео и аудио
+moviepy==1.0.3
+imageio
+imageio-ffmpeg
+numpy==1.22.0
+pillow
+proglog
+scipy==1.11.4
+pydub
+soundfile
+librosa==0.10.0
+numba==0.57.0
+
+# Конфиги и утилиты
+python-dotenv
+pyyaml
+pytest
+# Для работы с docker (опционально)
+docker
+
+# Добавленные зависимости
+TTS==0.22.0 
