@@ -11,7 +11,7 @@ def run_vad(audio_path, output_path, model_name='pyannote/voice-activity-detecti
     """
     from pyannote.audio import Pipeline
     # Токен пользователя для HuggingFace (гейтед модель)
-    HF_TOKEN = 'reg'
+    HF_TOKEN = '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'
     pipeline = Pipeline.from_pretrained(model_name, use_auth_token=HF_TOKEN)
     vad = pipeline({'audio': audio_path})
     with open(output_path, 'w') as f:
