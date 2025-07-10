@@ -36,7 +36,7 @@ def clean_temp_files(temp_dir, prefix):
                 print(f"[CLEANUP] Не удалось удалить {file}: {e}")
 
 
-def main(video_path, reference_audio_path, output_path, use_gpu=False, temp_dir="data/temp", mode="zero-shot"):
+def main(video_path, reference_audio_path, output_path, use_gpu=False, temp_dir="data/temp", mode="zero-shot", vad_enabled=False, vad_min_duration=0.5, finetune_data=None, finetune_epochs=5):
     # Получаем timestamp из output_path, если он есть
     m = re.search(r'(\d{8}_\d{4})', output_path)
     if m:
@@ -51,6 +51,15 @@ def main(video_path, reference_audio_path, output_path, use_gpu=False, temp_dir=
     # 1. Извлечение аудио из видео (и сохраняем в temp_dir)
     extracted_audio_path = os.path.join(temp_dir, f"{prefix}_extracted_audio.wav")
     audio_path = VideoProcessor.extract_audio(video_path, output_path=extracted_audio_path)
+
+    # 1.1 (Опционально) Сегментация аудио с помощью VAD
+    if vad_enabled:
+        from data_prep.data_prep_utils import run_vad
+        vad_segments_path = os.path.join(temp_dir, f"{prefix}_vad_segments.txt")
+        run_vad(audio_path, vad_segments_path, min_duration=vad_min_duration)
+        print(f"[PIPELINE][VAD] Использованы сегменты из VAD: {vad_segments_path}")
+        # Можно реализовать нарезку аудио по этим сегментам и подать их в ASR
+        # ... (оставлено для расширения)
 
     # 2. Распознавание речи (ASR)
     asr = SpeechRecognizer()
@@ -90,7 +99,28 @@ def main(video_path, reference_audio_path, output_path, use_gpu=False, temp_dir=
         mt_segments_path = mt_segments_output
 
     # 4. Генерация аудио по сегментам (TTS)
-    tts = VoiceCloner(reference_audio_path)
+    # --- Few-shot: дообучение TTS ---
+    tts_checkpoint_path = None
+    if mode == "few-shot" and finetune_data is not None:
+        # finetune_data = {'audio_paths': [...], 'texts': [...]}
+        from tts.voice_cloner import VoiceCloner
+        cloner = VoiceCloner(reference_audio_path)
+        tts_checkpoint_path = os.path.join(temp_dir, f"{prefix}_finetuned_tts_checkpoint.pth")
+        cloner.finetune(
+            train_audio_paths=finetune_data['audio_paths'],
+            train_texts=finetune_data['texts'],
+            output_checkpoint_path=tts_checkpoint_path,
+            use_gpu=use_gpu,
+            epochs=finetune_epochs
+        )
+        print(f"[PIPELINE][TTS] Дообученный чекпоинт сохранён: {tts_checkpoint_path}")
+    # --- Zero-shot: используем короткий чистый сегмент ---
+    if mode == "zero-shot":
+        # Здесь reference_audio_path должен быть коротким (5-10 сек) чистой речи
+        print(f"[PIPELINE][TTS] Для zero-shot используем короткий сегмент: {reference_audio_path}")
+    # --- Создаём VoiceCloner с нужным чекпоинтом ---
+    from tts.voice_cloner import VoiceCloner
+    tts = VoiceCloner(reference_audio_path, tts_checkpoint_path=tts_checkpoint_path)
     processed_segments = []
     with open(mt_segments_path, "r", encoding="utf-8") as f:
         for i, line in enumerate(f):

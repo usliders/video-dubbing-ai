@@ -32,3 +32,11 @@ docker
 
 # Добавленные зависимости
 TTS==0.22.0 
+# Для VAD и работы с сегментацией
+pyannote.audio
+pyannote.metrics
+torchaudio 
+
+# Для корректной работы VAD и pyannote.audio на Windows
+onnxruntime==1.16.0
+torchmetrics 

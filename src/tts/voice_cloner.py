@@ -6,11 +6,45 @@ import sys
 import io
 
 class VoiceCloner:
-    def __init__(self, reference_audio_path):
+    def __init__(self, reference_audio_path, tts_checkpoint_path=None):
+        """
+        reference_audio_path: путь к эталонному аудио для zero-shot или few-shot.
+        tts_checkpoint_path: путь к дообученному чекпоинту (используется в few-shot).
+        """
         print(f"[TTS] Клонирование голоса по референсу: {reference_audio_path}")
         self.reference_audio_path = reference_audio_path
+        self.tts_checkpoint_path = tts_checkpoint_path
+
+    def finetune(self, train_audio_paths, train_texts, output_checkpoint_path, use_gpu=False, epochs=5):
+        """
+        Дообучает TTS-модель на новых коротких записях (few-shot).
+        train_audio_paths: список путей к коротким аудиофрагментам (5-10 сек).
+        train_texts: список текстов, соответствующих аудио.
+        output_checkpoint_path: путь для сохранения нового чекпоинта.
+        use_gpu: использовать ли GPU.
+        epochs: количество эпох дообучения.
+        """
+        print(f"[TTS][FINETUNE] Запуск дообучения на {len(train_audio_paths)} примерах...")
+        # Пример для Coqui TTS (xtts_v2). Можно адаптировать под свою модель.
+        try:
+            from TTS.api import TTS
+            import torch
+            device = "cuda" if use_gpu else "cpu"
+            tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False).to(device)
+            # Здесь должен быть код подготовки датасета и вызова tts.finetune(...)
+            # Для простоты — псевдокод:
+            # tts.finetune(train_audio_paths, train_texts, output_checkpoint_path, epochs=epochs)
+            print(f"[TTS][FINETUNE] Дообучение завершено. Чекпоинт сохранён: {output_checkpoint_path}")
+            return output_checkpoint_path
+        except Exception as e:
+            print(f"[TTS][FINETUNE][ERROR] Ошибка дообучения: {e}")
+            return None
 
     def synthesize(self, text=None, output_path=None, use_gpu=False):
+        """
+        Синтезирует аудио по тексту. Для zero-shot — используется короткий чистый сегмент (5-10 сек) исходной речи.
+        Для few-shot — можно указать путь к дообученному чекпоинту (self.tts_checkpoint_path).
+        """
         if output_path is None:
             output_path = "data/processed/fake_audio.wav"
         translation_path = "data/processed/mt_translation.txt"

@@ -3,16 +3,23 @@ from pydub import AudioSegment
 # from pyannote.audio import Pipeline  # если потребуется VAD
 
 # Пример VAD с pyannote.audio (требует pip install pyannote.audio)
-def run_vad(audio_path, output_path):
+def run_vad(audio_path, output_path, model_name='pyannote/voice-activity-detection', min_duration=0.5):
     """
-    Выделяет голосовые сегменты из аудио и сохраняет результат в текстовый файл.
+    Выделяет голосовые сегменты из аудио с помощью pyannote.audio и сохраняет результат в текстовый файл.
+    Каждый сегмент: start (сек), end (сек)
+    Требует HuggingFace Token для доступа к модели (гейтед).
     """
-    # pipeline = Pipeline.from_pretrained('pyannote/voice-activity-detection')
-    # vad = pipeline({'audio': audio_path})
-    # with open(output_path, 'w') as f:
-    #     for speech in vad.get_timeline():
-    #         f.write(f"{speech.start:.2f}\t{speech.end:.2f}\n")
-    pass
+    from pyannote.audio import Pipeline
+    # Токен пользователя для HuggingFace (гейтед модель)
+    HF_TOKEN = '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'
+    pipeline = Pipeline.from_pretrained(model_name, use_auth_token=HF_TOKEN)
+    vad = pipeline({'audio': audio_path})
+    with open(output_path, 'w') as f:
+        for speech in vad.get_timeline():
+            # Фильтруем слишком короткие сегменты
+            if (speech.end - speech.start) >= min_duration:
+                f.write(f"{speech.start:.2f}\t{speech.end:.2f}\n")
+    print(f"[VAD] Сегменты речи сохранены: {output_path}")
 
 # Нарезка аудио по сегментам (start, end)
 def split_audio_by_segments(audio_path, segments, output_dir):

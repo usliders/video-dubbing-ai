@@ -25,6 +25,23 @@ def compute_similarity(embedding1, embedding2):
     """
     return 1 - cosine(embedding1, embedding2)
 
+def similarity_upper_bound(segment_paths):
+    """
+    Вычисляет среднее значение similarity между всеми парами оригинальных сегментов одного спикера.
+    Используется для оценки верхней границы метрики (upper bound).
+    """
+    embeddings = [extract_embedding(p) for p in segment_paths]
+    n = len(embeddings)
+    if n < 2:
+        return None
+    sims = []
+    for i in range(n):
+        for j in range(i+1, n):
+            sims.append(compute_similarity(embeddings[i], embeddings[j]))
+    if sims:
+        return np.mean(sims)
+    return None
+
 # Пример пакетной оценки
 # def batch_evaluate(ref_paths, gen_paths):
 #     sims = []
