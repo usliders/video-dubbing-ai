@@ -5,7 +5,7 @@ env/
 
 # Игнорировать выходные данные
 #data/output/
-data/temp/
+#data/temp/
 data/input/original/
 
 # Игнорировать временные/кэш-файлы
